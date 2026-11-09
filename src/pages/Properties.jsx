@@ -5,7 +5,7 @@ import PropertyGrid from "../components/properties/PropertyGrid";
 import EmptyEstate from "../components/properties/EmptyEstate";
 import Pagination from "../components/properties/Pagination";
 import Form from "../components/properties/Form";
-import {properties} from "../data/apiProperty"
+import { useGetPropertiesQuery } from "../data/apiProperty";
 const initialFilters = {
   search: "",
   type: "All",
@@ -19,10 +19,16 @@ export default function Properties() {
   const [appliedFilters, setAppliedFilters] = useState(initialFilters);
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
+  const {
+    data: properties,
+    isLoading,
+    isError,
+    error,
+  } = useGetPropertiesQuery();
   const itemsPerPage = 6;
 
   const filteredProperties = useMemo(() => {
-    let result = properties.filter((property) => {
+    let result = (properties ?? []).filter((property) => {
       const search = appliedFilters.search.trim().toLowerCase();
 
       const matchesSearch =
@@ -31,7 +37,8 @@ export default function Properties() {
         property.location.toLowerCase().includes(search);
 
       const matchesType =
-        appliedFilters.type === "All" || property.typeId === appliedFilters.type;
+        appliedFilters.type === "All" ||
+        property.typeId === appliedFilters.type;
 
       const matchesLocation =
         appliedFilters.location === "All" ||
@@ -58,7 +65,6 @@ export default function Properties() {
       );
     });
 
-
     if (sort === "price-low") {
       result = [...result].sort((a, b) => a.price - b.price);
     } else if (sort === "price-high") {
@@ -66,7 +72,14 @@ export default function Properties() {
     }
 
     return result;
-  }, [appliedFilters, sort]);
+  }, [appliedFilters, sort, properties]);
+
+  console.log(filteredProperties);
+
+  if (isLoading)
+    return <p className="text-[5rem] text-white">در حال دریافت املاک...</p>;
+
+  if (isError) return <p>خطا: {error?.error || error?.status}</p>;
 
   const totalPages = Math.max(
     1,
@@ -85,11 +98,16 @@ export default function Properties() {
     setPage(1);
   };
 
-  const start =     
+  const start =
     filteredProperties.length === 0 ? 0 : (page - 1) * itemsPerPage + 1;
 
   const end = Math.min(page * itemsPerPage, filteredProperties.length);
-
+console.log(
+  properties?.map((property) => ({
+    title: property.title,
+    id: property.id,
+  }))
+);
   return (
     <main className="min-h-screen bg-[#07140f] text-[#f2f0e8] pt-[8rem]">
       <section className="mx-auto max-w-[160rem] px-[2rem] pb-[7rem] pt-[4rem] sm:px-[4rem] lg:px-[6rem]">

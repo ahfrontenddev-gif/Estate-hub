@@ -1,5 +1,8 @@
+
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import {
   FiArrowLeft,
@@ -13,16 +16,27 @@ import {
 import FromRow from "./FromRow";
 import Remember from "./Remember";
 import ForgetPassword from "./ForgetPassword";
-import { useNavigate } from "react-router-dom";
+
+import { useRegisterMutation, useLazyLoginQuery } from "../../data/apiAuth";
+import { setCredentials } from "../../redux/authSlice";
 
 const Form = ({ isLogin, showPassword, setShowPassword, setMessage }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [rememberMe, setRememberMe] = useState(true);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
   });
-  const navigate = useNavigate()
+
+  const [register, { isLoading: isRegistering }] = useRegisterMutation();
+
+  const [login, { isLoading: isLoggingIn }] = useLazyLoginQuery();
+
+  const isLoading = isRegistering || isLoggingIn;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,7 +49,7 @@ const Form = ({ isLogin, showPassword, setShowPassword, setMessage }) => {
     setMessage("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isLogin && !form.name.trim()) {
@@ -53,13 +67,44 @@ const Form = ({ isLogin, showPassword, setShowPassword, setMessage }) => {
       return;
     }
 
-    setMessage(
-      isLogin
-        ? "وارد شدی"
-        : "ثبت نام شدی",
-    );
-    setForm({})
-    navigate('/')
+    try {
+      if (isLogin) {
+        const users = await login({
+          email: form.email.trim(),
+          password: form.password,
+        }).unwrap();
+
+        if (!users || users.length === 0) {
+          setMessage("ایمیل یا رمز عبور اشتباه است.");
+          return;
+        }
+
+        dispatch(setCredentials(users[0]));
+
+        setMessage("با موفقیت وارد شدید.");
+      } else {
+        const newUser = await register({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+        }).unwrap();
+
+        dispatch(setCredentials(newUser));
+
+        setMessage("ثبت‌نام با موفقیت انجام شد.");
+      }
+
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+      });
+
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      setMessage("مشکلی در ارتباط با سرور رخ داد.");
+    }
   };
 
   const inputClass =
@@ -155,7 +200,10 @@ const Form = ({ isLogin, showPassword, setShowPassword, setMessage }) => {
             transition={{ duration: 0.25 }}
             className="flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm"
           >
-            <Remember rememberMe={rememberMe} setRememberMe={setRememberMe} />
+            <Remember
+              rememberMe={rememberMe}
+              setRememberMe={setRememberMe}
+            />
 
             <ForgetPassword setMessage={setMessage} />
           </motion.div>
@@ -164,16 +212,20 @@ const Form = ({ isLogin, showPassword, setShowPassword, setMessage }) => {
 
       <motion.button
         type="submit"
+        disabled={isLoading}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
-        className="group flex w-full items-center justify-center gap-3 rounded-lg bg-[#10251c] px-5 py-4 text-xl font-medium text-white transition-colors duration-300 hover:bg-[#263f30] focus:outline-none focus:ring-2 focus:ring-[#526e58] focus:ring-offset-2"
+        className="group flex w-full items-center justify-center gap-3 rounded-lg bg-[#10251c] px-5 py-4 text-xl font-medium text-white transition-colors duration-300 hover:bg-[#263f30] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span>{isLogin ? "ورود به حساب کاربری" : "ایجاد حساب کاربری"}</span>
+        <span>
+          {isLoading
+            ? "لطفاً صبر کنید..."
+            : isLogin
+              ? "ورود به حساب کاربری"
+              : "ایجاد حساب کاربری"}
+        </span>
 
-        <FiArrowLeft
-          size={18}
-          className="transition-transform duration-300 group-hover:-translate-x-1"
-        />
+        {!isLoading && <FiArrowLeft size={18} />}
       </motion.button>
     </motion.form>
   );

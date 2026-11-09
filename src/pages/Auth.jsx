@@ -24,7 +24,6 @@ const Auth = () => {
       dir="rtl"
       className="flex min-h-screen flex-col items-center justify-center bg-[#f2f1e9] px-4 py-10 text-[#14251d] sm:px-6"
     >
-      {/* Logo */}
       <motion.a
         href="/"
         initial={{ opacity: 0, y: -10 }}

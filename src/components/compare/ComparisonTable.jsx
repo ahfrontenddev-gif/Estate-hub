@@ -108,7 +108,6 @@ const ComparisonTable = ({
                 );
               })}
 
-              {/* امکانات */}
               <tr className="border-t border-[#e5e6dd]">
                 <th className="px-5 py-5 text-[1.2rem] font-medium text-[#56635a]">
                   امکانات
@@ -152,7 +151,6 @@ const ComparisonTable = ({
                 })}
               </tr>
 
-              {/* لینک ملک */}
               <tr className="border-t border-[#e5e6dd]">
                 <th className="px-5 py-5 text-[1.2rem] font-medium text-[#56635a]">
                   لینک ملک

@@ -1,7 +1,16 @@
-import { FiCheck} from "react-icons/fi";
+import { FiCheck } from "react-icons/fi";
 import DedicatedConsultant from "./DedicatedConsultant";
 
-const Consultant = ({property,agent,handleSubmit,form,setForm}) => {
+const Consultant = ({ property, agent, handleSubmit, form, setForm }) => {
+  const features = Array.isArray(property.features)
+    ? property.features
+    : typeof property.features === "string"
+      ? property.features
+          .split("-")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+
   return (
     <section className="px-5 py-16 sm:px-8 lg:px-16 lg:py-24">
       <div className="mx-auto grid max-w-[160rem] grid-cols-1 gap-12 lg:grid-cols-12">
@@ -22,11 +31,15 @@ const Consultant = ({property,agent,handleSubmit,form,setForm}) => {
             <h3 className="text-[2rem] font-medium">امکانات و ویژگی‌ها</h3>
 
             <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {property.features.map((feature) => (
-                <div key={feature} className="flex items-center gap-3">
+              {features.map((feature, index) => (
+                <div
+                  key={`${feature}-${index}`}
+                  className="flex items-center gap-3"
+                >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e1e8d9] text-[#49634d]">
                     <FiCheck />
                   </span>
+
                   <span className="text-[1.4rem] text-gray-600">{feature}</span>
                 </div>
               ))}
@@ -34,7 +47,12 @@ const Consultant = ({property,agent,handleSubmit,form,setForm}) => {
           </div>
         </div>
 
-    <DedicatedConsultant agent={agent} handleSubmit={handleSubmit} form={form} setForm={setForm} />
+        <DedicatedConsultant
+          agent={agent}
+          handleSubmit={handleSubmit}
+          form={form}
+          setForm={setForm}
+        />
       </div>
     </section>
   );

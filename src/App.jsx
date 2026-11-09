@@ -1,10 +1,14 @@
+import { Provider } from "react-redux";
+import AnimatedRoutes from "./components/animate/AnimatedRoutes";
+import { store } from "./redux/store";
 import { BrowserRouter } from "react-router-dom";
-import AnimatedRoutes from "./components/animate/AnimatedRoutes"
 function App() {
   return (
-    <BrowserRouter>
-      <AnimatedRoutes />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <AnimatedRoutes />
+      </BrowserRouter>
+    </Provider>
   );
 }
 

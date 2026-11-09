@@ -168,7 +168,6 @@ const Consultation = ({ submitted, handleSubmit, form, handleChange }) => {
         </form>
       </div>
 
-      {/* Working hours */}
       <div className="mt-5 flex items-center justify-center gap-2 text-xl text-white/60">
         <FiClock size={15} />
         <span>شنبه تا پنجشنبه، ساعت ۹ تا ۱۸</span>

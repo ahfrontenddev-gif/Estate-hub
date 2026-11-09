@@ -84,7 +84,6 @@ const NotFound = () => {
         </button>
       </motion.section>
 
-      {/* Footer */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

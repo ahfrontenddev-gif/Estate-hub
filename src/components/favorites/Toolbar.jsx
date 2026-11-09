@@ -13,9 +13,9 @@ const Toolbar = ({ sortBy, view, setView, setSortBy }) => {
           value={sortBy}
           onChange={(event) => setSortBy(event.target.value)}
           aria-label="مرتب‌سازی املاک"
-          className="min-w-[17rem] appearance-none rounded-md border border-[#dedfd5] bg-transparent py-3 pl-9 pr-4 text-[1.2rem] outline-none focus:border-[#526e58]"
+          className="min-w-[17rem] cursor-pointer appearance-none rounded-md border border-[#dedfd5] bg-transparent py-3 pl-9 pr-4 text-[1.2rem] outline-none focus:border-[#526e58]"
         >
-          <option value="newest">مرتب‌سازی بر اساس</option>
+          <option value="newest">جدیدترین</option>
           <option value="price-low">قیمت: از کم به زیاد</option>
           <option value="price-high">قیمت: از زیاد به کم</option>
           <option value="area">بیشترین متراژ</option>

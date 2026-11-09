@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { useGetPropertiesQuery } from "../data/apiProperty";
+
 import Hero from "../components/details/Hero";
 import Toolbar from "../components/details/Toolbar";
 import Consultant from "../components/details/Consultant";
 import EstateSimilar from "../components/details/EstateSimilar";
 import Galery from "../components/details/Galery";
-
-import { properties } from "../data/apiProperty";
 
 const agent = {
   name: "علی محمدی",
@@ -21,8 +21,10 @@ const PropertyDetails = () => {
   const { propertyId } = useParams();
   const navigate = useNavigate();
 
+  const { data: properties = [], isLoading, isError } = useGetPropertiesQuery();
+
   const property = properties.find(
-    (item) => String(item.id) === propertyId
+    (item) => String(item.id) === String(propertyId),
   );
 
   const [activeImage, setActiveImage] = useState(0);
@@ -36,25 +38,50 @@ const PropertyDetails = () => {
   });
 
   useEffect(() => {
-    if (!property) {
+    if (!isLoading && !isError && !property) {
       navigate("/404", { replace: true });
     }
-  }, [property, navigate]);
+  }, [isLoading, isError, property, navigate]);
+
+  if (isLoading) {
+    return (
+      <main dir="rtl" className="min-h-screen bg-[#f5f5ef] p-10">
+        <p className="text-center">در حال دریافت اطلاعات ملک...</p>
+      </main>
+    );
+  }
+
+  if (isError) {
+    return (
+      <main dir="rtl" className="min-h-screen bg-[#f5f5ef] p-10">
+        <p className="text-center text-red-600">
+          دریافت اطلاعات ملک با خطا مواجه شد.
+        </p>
+      </main>
+    );
+  }
 
   if (!property) return null;
 
+  const images = Array.isArray(property.images)
+    ? property.images
+    : typeof property.images === "string"
+      ? property.images
+          .split(",")
+          .map((image) => image.trim())
+          .filter(Boolean)
+      : [];
+
   const nextImage = () => {
-    setActiveImage(
-      (current) => (current + 1) % property.images.length
-    );
+    if (!images.length) return;
+
+    setActiveImage((current) => (current + 1) % images.length);
   };
 
   const previousImage = () => {
-    setActiveImage(
-      (current) =>
-        (current - 1 + property.images.length) %
-        property.images.length
-    );
+    if (!images.length) return;
+
+    setActiveImage((current) => (current - 1 + images.length) % images.length);
   };
 
   const handleSubmit = (event) => {
@@ -70,12 +97,9 @@ const PropertyDetails = () => {
   };
 
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-[#f5f5ef] text-[#17251d]"
-    >
+    <main dir="rtl" className="min-h-screen bg-[#f5f5ef] text-[#17251d]">
       <Hero
-        property={property}
+        property={{ ...property, images }}
         setIsGalleryOpen={setIsGalleryOpen}
         activeImage={activeImage}
         setIsFavorite={setIsFavorite}
@@ -96,10 +120,7 @@ const PropertyDetails = () => {
         form={form}
       />
 
-      <EstateSimilar
-        properties={properties}
-        property={property}
-      />
+      <EstateSimilar properties={properties} property={property} />
 
       {isGalleryOpen && (
         <Galery
@@ -107,7 +128,7 @@ const PropertyDetails = () => {
           nextImage={nextImage}
           setIsGalleryOpen={setIsGalleryOpen}
           activeImage={activeImage}
-          property={property}
+          property={{ ...property, images }}
         />
       )}
     </main>
@@ -115,3 +136,4 @@ const PropertyDetails = () => {
 };
 
 export default PropertyDetails;
+ 

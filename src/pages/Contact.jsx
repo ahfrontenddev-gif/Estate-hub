@@ -41,10 +41,8 @@ const Contact = () => {
       dir="rtl"
       className="min-h-screen overflow-hidden bg-[#f2f1e9] text-[#14251d]"
     >
-      {/* Contact Hero */}
     <Hero contactInfo={contactInfo} form={form} handleChange={handleChange} handleSubmit={handleSubmit} submitted={submitted} />
 
-      {/* Bottom CTA */}
       <section className="px-5 py-16 sm:px-8 sm:py-20 lg:px-16">
         <div className="mx-auto flex max-w-[1400px] flex-col items-start justify-between gap-7 rounded-2xl border border-[#e0e1d7] bg-[#f8f7f1] p-7 sm:p-10 lg:flex-row lg:items-center lg:p-14">
           <div>

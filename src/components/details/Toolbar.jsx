@@ -17,7 +17,6 @@ const Toolbar = ({property}) => {
             value: `${property.parking} خودرو`,
           },
           { icon: FiWind, title: "سیستم هوشمند", value: "دارد" },
-          // { icon: FiTrees, title: "فضای سبز", value: "دارد" },
         ].map((item) => (
           <div
             key={item.title}

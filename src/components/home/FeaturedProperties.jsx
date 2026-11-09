@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import PropertyCard from "./PropertyCard";
-import { properties } from "../../data/apiProperty";
 import { Link } from "react-router-dom";
 
 const FeaturedProperties = () => {
@@ -134,59 +133,9 @@ const FeaturedProperties = () => {
               lg:gap-[2.4rem]
             "
           >
-            {properties.map((property) => (
-              <div
-                key={property.id}
-                className="property-slide shrink-0"
-              >
-                <PropertyCard property={property} />
-              </div>
-            ))}
           </div>
         </div>
 
-        <div
-          className="
-            mt-[3rem] flex items-center justify-between
-            border-t border-white/10 pt-[2rem]
-          "
-        >
-          <span className="text-[1.1rem] text-white/25">
-            برای مشاهده املاک بیشتر حرکت کنید
-          </span>
-
-          <div className="flex items-center gap-[1rem]">
-            <button
-              type="button"
-              onClick={() => scroll("prev")}
-              aria-label="ملک قبلی"
-              className="
-                flex h-[4.2rem] w-[4.2rem] items-center justify-center
-                rounded-full border border-white/15 text-white/60
-                transition duration-300
-                hover:border-[#b5c9a9] hover:bg-[#b5c9a9]
-                hover:text-[#080d0b]
-              "
-            >
-              <FiArrowRight size={17} />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => scroll("next")}
-              aria-label="ملک بعدی"
-              className="
-                flex h-[4.2rem] w-[4.2rem] items-center justify-center
-                rounded-full border border-white/15 text-white/60
-                transition duration-300
-                hover:border-[#b5c9a9] hover:bg-[#b5c9a9]
-                hover:text-[#080d0b]
-              "
-            >
-              <FiArrowLeft size={17} />
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   );

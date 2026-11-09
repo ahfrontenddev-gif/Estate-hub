@@ -8,7 +8,15 @@ import {
   FiTruck,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
-const PropertyItem = ({ property, onRemove, view, formatNumber }) => {
+import { toggleFavorite } from "../../redux/favoriteSlice";
+import { useDispatch, useSelector } from "react-redux";
+const PropertyItem = ({ property, view, formatNumber }) => {
+  const images = property.images?.split(",").map((img) => img.trim()) || [];
+  const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.favorites.ids);
+  const isFavorite = favorites.includes(property.id);
+
+
   return (
     <motion.article
       layout
@@ -36,7 +44,7 @@ const PropertyItem = ({ property, onRemove, view, formatNumber }) => {
           className="block h-full w-full"
         >
           <img
-            src={property.images[0]}
+            src={images[0]}
             alt={property.title}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
@@ -50,12 +58,20 @@ const PropertyItem = ({ property, onRemove, view, formatNumber }) => {
         <button
           data-cursor="default"
           type="button"
-          onClick={() => onRemove(property.id)}
-          aria-label="حذف از علاقه‌مندی‌ها"
-          title="حذف از علاقه‌مندی‌ها"
-          className="absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[#10251c] p-2 text-[#d9e5bd] transition-colors duration-300 hover:bg-[#b7c99c] hover:text-[#10251c]"
+          onClick={() => dispatch(toggleFavorite(property.id))}
+          aria-label={
+            isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"
+          }
+          title={
+            isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"
+          }
+          className={`absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full p-2 transition-colors duration-300 ${
+            isFavorite
+              ? "bg-[#b7c99c] text-[#10251c]"
+              : "bg-[#10251c] text-[#d9e5bd] hover:bg-[#b7c99c] hover:text-[#10251c]"
+          }`}
         >
-          <FiHeart size={19} fill="currentColor" />
+          <FiHeart size={19} fill={isFavorite ? "currentColor" : "none"} />
         </button>
       </div>
 
@@ -78,7 +94,7 @@ const PropertyItem = ({ property, onRemove, view, formatNumber }) => {
         </div>
 
         <p className="mt-5 whitespace-nowrap text-[1.35rem] font-semibold text-[#526e58]">
-          {formatNumber(property.price)} تومان
+          {property.price} تومان
         </p>
 
         <div className="mt-5 grid grid-cols-4 items-center border-t border-[#e8e8df] pt-4 text-[#56635a]">
@@ -98,9 +114,7 @@ const PropertyItem = ({ property, onRemove, view, formatNumber }) => {
 
           <div className="flex flex-col items-center gap-2">
             <FiMaximize2 size={16} />
-            <span className="text-[1.1rem]">
-              {formatNumber(property.area)} متر
-            </span>
+            <span className="text-[1.1rem]">{property.area} متر</span>
           </div>
 
           <Link

@@ -1,67 +1,130 @@
+
 import { useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import Empty from "../components/compare/Empty";
 import Title from "../components/compare/Title";
 import CartEstate from "../components/compare/CartEstate";
 import ComparisonTable from "../components/compare/ComparisonTable";
 
-import { properties } from "../data/apiProperty";
 import { comparisonRows } from "../data/apiCompare";
-import { formatNumber, formatPrice } from "../data/api";
+import { useGetPropertiesQuery } from "../data/apiProperty";
+
+import {
+  removeCompare,
+  clearCompare,
+  toggleCompare,
+} from "../redux/compareSlice";
+
+const toNumber = (value) => {
+  if (value === null || value === undefined || value === "") return 0;
+
+  const normalized = String(value)
+    .replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d))
+    .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d))
+    .replace(/[٬,،]/g, "")
+    .replace(/[^\d.-]/g, "");
+
+  return Number(normalized) || 0;
+};
+
+const formatNumber = (value) =>
+  toNumber(value).toLocaleString("fa-IR");
+
+const formatPrice = (value) =>
+  `${formatNumber(value)} تومان`;
 
 const Compare = () => {
-  const [comparedIds, setComparedIds] = useState(["1", "2", "3"]);
+  const dispatch = useDispatch();
   const [selectedId, setSelectedId] = useState("");
+
+  const comparedIds = useSelector(
+    (state) => state.compare.ids
+  );
+
+  const {
+    data: properties = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetPropertiesQuery();
 
   const comparedProperties = useMemo(
     () =>
       comparedIds
         .map((id) =>
           properties.find(
-            (property) => String(property.id) === String(id),
-          ),
+            (property) => String(property.id) === String(id)
+          )
         )
         .filter(Boolean),
-    [comparedIds],
+    [comparedIds, properties]
   );
 
-  const availableProperties = properties.filter(
-    (property) =>
-      !comparedIds.some(
-        (id) => String(id) === String(property.id),
+  const availableProperties = useMemo(
+    () =>
+      properties.filter(
+        (property) =>
+          !comparedIds.some(
+            (id) => String(id) === String(property.id)
+          )
       ),
+    [properties, comparedIds]
   );
 
   const addProperty = () => {
     if (!selectedId) return;
 
-    if (comparedIds.some((id) => String(id) === String(selectedId))) {
-      setSelectedId("");
+    if (comparedIds.length >= 3) {
+      alert("حداکثر ۳ ملک قابل مقایسه است");
       return;
     }
 
-    if (comparedIds.length >= 3) return;
-
-    const exists = initialFavorites.some(
-      (property) => String(property.id) === String(selectedId),
-    );
-
-    if (!exists) return;
-
-    setComparedIds((current) => [...current, String(selectedId)]);
+    dispatch(toggleCompare(String(selectedId)));
     setSelectedId("");
   };
 
   const removeProperty = (id) => {
-    setComparedIds((current) =>
-      current.filter((item) => String(item) !== String(id)),
-    );
+    dispatch(removeCompare(String(id)));
   };
 
-  const clearComparison = () => {
-    setComparedIds([]);
+  const handleClearComparison = () => {
+    dispatch(clearCompare());
     setSelectedId("");
   };
+
+  if (isLoading) {
+    return (
+      <main
+        dir="rtl"
+        className="flex min-h-[70vh] items-center justify-center bg-[#f2f1e9]"
+      >
+        <p className="text-lg text-[#526e58]">
+          در حال دریافت اطلاعات املاک...
+        </p>
+      </main>
+    );
+  }
+
+  if (isError) {
+    return (
+      <main
+        dir="rtl"
+        className="flex min-h-[70vh] flex-col items-center justify-center gap-4 bg-[#f2f1e9]"
+      >
+        <p className="text-lg text-red-600">
+          دریافت اطلاعات املاک با خطا مواجه شد.
+        </p>
+
+        <button
+          onClick={refetch}
+          className="rounded-md bg-[#14251d] px-6 py-3 text-white"
+        >
+          تلاش مجدد
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main
@@ -71,7 +134,7 @@ const Compare = () => {
       <div className="mx-auto w-full max-w-[160rem]">
         <Title
           comparedProperties={comparedProperties}
-          clearComparison={clearComparison}
+          clearComparison={handleClearComparison}
         />
 
         <div className="w-full sm:px-8 lg:px-12">
@@ -94,7 +157,22 @@ const Compare = () => {
               />
             </>
           ) : (
-            <Empty />
+            <div className="flex flex-col gap-6">
+              <Empty />
+
+              {availableProperties.length > 0 && (
+                <CartEstate
+                  setSelectedId={setSelectedId}
+                  selectedId={selectedId}
+                  removeProperty={removeProperty}
+                  formatPrice={formatPrice}
+                  formatNumber={formatNumber}
+                  comparedProperties={comparedProperties}
+                  addProperty={addProperty}
+                  availableProperties={availableProperties}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>
